@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Transferencias</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;700;900&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background: radial-gradient(circle at top, #001219 0%, #000000 70%);
+        color: white;
+    }
+    .neon-main {
+        color: #00ff85;
+        text-shadow: 0 0 12px #00ff85, 0 0 35px #00ff85;
+    }
+    .neon-soft {
+        color: #00ff85;
+        text-shadow: 0 0 8px #00ff8590;
+    }
+    .glass {
+        background: rgba(255,255,255,0.07);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+    }
+    select, input {
+        background-color: rgba(255,255,255,0.95) !important;
+        color: #111 !important;
+    }
+    .btn-ea {
+        background: linear-gradient(135deg, #ffe259, #ffa751);
+        color: #111;
+        font-weight: 900;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        box-shadow: 0 0 15px rgba(255,200,70,0.6);
+    }
+    .divider-ea {
+        height: 3px;
+        background: linear-gradient(to right, #00ff85, transparent);
+    }
+</style>
+</head>
+
+<body class="p-10">
+
+    <!-- BOTÓN HOME -->
+    <div class="mb-6">
+        <a href="/" 
+        class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold 
+                py-2 px-5 rounded-xl shadow-lg transition neon-soft"
+        style="box-shadow: 0 0 12px rgba(255,209,84,0.7);">
+            ⬅ Home
+        </a>
+    </div>
+
+    <h1 class="text-center text-5xl font-black neon-main">TRANSFER MARKET</h1>
+    <p class="text-center text-gray-300 max-w-lg mx-auto mb-10">Consulta transferencias reales por año, liga y club.</p>
+
+    <!-- FORM CARD -->
+    <div class="max-w-4xl mx-auto glass p-8">
+        <h2 class="text-2xl font-bold neon-soft mb-4">Filtros</h2>
+        <div class="divider-ea mb-8"></div>
+
+        {% if error %}
+        <div class="bg-red-500/80 p-3 rounded text-center font-bold mb-6 border border-red-400">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" class="space-y-6">
+
+            <!-- Grid 2 columnas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Año -->
+                <div>
+                    <label class="uppercase text-sm text-gray-300 font-semibold">Año</label>
+                    <select name="año" class="mt-2 p-3 w-full rounded-lg" required>
+                        <option value="">Selecciona...</option>
+                        {% for y in años %}
+                        <option value="{{ y }}" {% if selected.año == y|string %}selected{% endif %}>
+                            {{ y }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Liga -->
+                <div>
+                    <label class="uppercase text-sm text-gray-300 font-semibold">Liga</label>
+                    <select name="liga" id="liga" class="mt-2 p-3 w-full rounded-lg" required>
+                        <option value="">Selecciona...</option>
+                        {% for l in ligas %}
+                        <option value="{{ l }}" {% if selected.liga == l %}selected{% endif %}>
+                            {{ l.replace('-', ' ')|title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Club -->
+                <div>
+                    <label class="uppercase text-sm text-gray-300 font-semibold">Club</label>
+                    <select name="club_id" id="club" class="mt-2 p-3 w-full rounded-lg" required>
+                        {% if not selected.liga %}
+                            <option value="">Selecciona una liga primero...</option>
+                        {% else %}
+                            {% if selected.club_id %}
+                                <option value="{{ selected.club_id }}" selected>
+                                    {{ selected.club_name if selected.club_name else "Club seleccionado" }}
+                                </option>
+                            {% else %}
+                                <option value="">Selecciona...</option>
+                            {% endif %}
+                        {% endif %}
+                    </select>
+                </div>
+
+                <!-- Tipo -->
+                <div>
+                    <label class="uppercase text-sm text-gray-300 font-semibold">Tipo</label>
+                    <select name="tipo" class="mt-2 p-3 w-full rounded-lg" required>
+                        <option value="">Selecciona...</option>
+                        {% for t in tipos %}
+                        <option value="{{ t }}" {% if selected.tipo == t %}selected{% endif %}>
+                            {{ t|capitalize }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Orden -->
+                <div class="md:col-span-2">
+                    <label class="uppercase text-sm text-gray-300 font-semibold">Ordenar por</label>
+                    <select name="orden" class="mt-2 p-3 w-full rounded-lg" required>
+                        <option value="">Selecciona...</option>
+                        {% for o in ordenes %}
+                        <option value="{{ o }}" {% if selected.orden == o %}selected{% endif %}>{{ o|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Botón -->
+            <div class="pt-2">
+                <button class="btn-ea w-full py-3 rounded-xl text-lg">Buscar Transferencias 🔍</button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Resultados -->
+    {% if request.method == 'POST' %}
+    <div class="max-w-6xl mx-auto glass p-8 mt-10">
+
+        {% if results and results|length > 0 %}
+        <h2 class="text-3xl font-bold neon-soft text-center mb-6">Resultados</h2>
+        <div class="divider-ea mb-6"></div>
+
+        <table class="w-full text-sm">
+            <thead class="text-black bg-yellow-400 uppercase font-bold">
+                <tr>
+                    <th class="p-3 text-left rounded-l-lg">Jugador</th>
+                    <th class="p-3 text-left">Desde</th>
+                    <th class="p-3 text-left">Hacia</th>
+                    <th class="p-3 text-left">Fecha</th>
+                    <th class="p-3 text-right rounded-r-lg">Valor (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr class="border-b border-white/10 hover:bg-white/10 transition">
+                    <td class="p-3 font-bold">{{ r.player_name }}</td>
+                    <td class="p-3 text-gray-300">{{ r.from_club }}</td>
+                    <td class="p-3 text-gray-300">{{ r.to_club }}</td>
+                    <td class="p-3">{{ r.transfer_date }}</td>
+                    <td class="p-3 text-right text-[#00ff85] font-black text-lg">
+                        {{ "{:,.0f}".format(r.transfer_fee or 0) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+        <div class="text-center p-6">
+            <h3 class="text-2xl neon-soft">No se encontraron transferencias</h3>
+            <p class="text-gray-300 mt-2">Intenta con otros filtros</p>
+        </div>
+        {% endif %}
+
+    </div>
+    {% endif %}
+
+<!-- Ajax Logic -->
+<script>
+    function cargarClubes(liga, clubSeleccionadoId = null) {
+        const clubSelect = document.getElementById("club");
+        
+        if (!clubSeleccionadoId) {
+            clubSelect.innerHTML = "<option>Cargando clubes...</option>";
+        }
+
+        fetch(`/clubs_by_league?liga=${encodeURIComponent(liga)}`)
+            .then(response => response.json())
+            .then(clubs => {
+                clubSelect.innerHTML = '<option value="">Selecciona...</option>';
+                clubs.forEach(c => {
+                    const isSelected = (clubSeleccionadoId && c.id == clubSeleccionadoId) ? 'selected' : '';
+                    clubSelect.innerHTML += `<option value="${c.id}" ${isSelected}>${c.name}</option>`;
+                });
+            })
+            .catch(error => console.error('Error cargando clubes:', error));
+    }
+
+    document.getElementById("liga").addEventListener("change", function() {
+        cargarClubes(this.value);
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const currentLiga = "{{ selected.liga or '' }}";
+        const currentClubId = "{{ selected.club_id or '' }}";
+
+        if (currentLiga) {
+            cargarClubes(currentLiga, currentClubId);
+        }
+    });
+</script>
+
+</body>
+</html>

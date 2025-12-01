@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Football Data FC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+    body {
+        background: #000;
+        overflow-x: hidden;
+    }
+    .neon {
+        text-shadow: 0 0 12px #00ff85, 0 0 35px #00ff85;
+    }
+    .card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+    .card:hover {
+        transform: translateY(-4px);
+        transition: 0.25s;
+        box-shadow: 0 0 20px rgba(0,255,133,0.2);
+    }
+</style>
+</head>
+
+<body class="text-white">
+
+<!-- Fondo -->
+<div class="absolute inset-0 bg-cover bg-center opacity-40"
+    style="background-image: url('https://www.shutterstock.com/image-photo/blur-background-empty-soccer-stadium-260nw-2595841727.jpg');"></div>
+
+<!-- Contenido -->
+<div class="relative z-10 h-screen flex flex-col justify-center items-center text-center">
+
+    <!-- Título -->
+    <h1 class="text-6xl font-black neon tracking-tight">Football Data FC</h1>
+
+    <!-- Panel último resultado -->
+<div class="absolute right-10 top-1/4 bg-white/10 card p-5 rounded-xl w-80 text-center">
+
+    <p class="uppercase text-xs text-gray-300 tracking-wide">Último resultado</p>
+
+    <div class="flex justify-center items-center gap-3 mt-3">
+        <img src="{{ result.home_logo }}" class="h-10 w-10 object-contain">
+        <span class="text-[13px] font-semibold text-gray-300">VS</span>
+        <img src="{{ result.away_logo }}" class="h-10 w-10 object-contain">
+    </div>
+
+    <p class="text-lg font-bold text-[#00ff85] mt-3">
+        {{ result.home }} {{ result.score }} {{ result.away }}
+    </p>
+
+    <p class="text-gray-400 text-xs mt-1">{{ result.date }}</p>
+</div>
+
+    <!-- Selectores -->
+    <div class="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-10 w-full max-w-6xl">
+
+        <a href="/players" class="card p-6 rounded-xl text-center font-semibold">
+            <h3 class="text-xl text-[#00ff85]">Jugadores</h3>
+            <p class="text-gray-300 text-sm mt-2">Quiénes son los más valiosos?.</p>
+        </a>
+
+        <a href="/transfers" class="card p-6 rounded-xl text-center font-semibold">
+            <h3 class="text-xl text-[#00ff85]">Transferencias</h3>
+            <p class="text-gray-300 text-sm mt-2">Mercado y fichajes.</p>
+        </a>
+
+        <a href="/comparador" class="card p-6 rounded-xl text-center font-semibold">
+            <h3 class="text-xl text-[#00ff85]">Comparador</h3>
+            <p class="text-gray-300 text-sm mt-2">Club vs Club.</p>
+        </a>
+
+        <a href="/top-players" class="card p-6 rounded-xl text-center font-semibold">
+            <h3 class="text-xl text-[#00ff85]">Top Players</h3>
+            <p class="text-gray-300 text-sm mt-2">Ranking estilo EA FC.</p>
+        </a>
+
+    </div>
+</div>
+
+</body>
+</html>
